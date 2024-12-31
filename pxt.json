@@ -1,16 +1,17 @@
 {
-    "name": "Maqueen + MBit App test 1",
+    "name": "Maqueen + MBit App test 1 _ DFROBOT Announce",
     "description": "",
     "dependencies": {
         "core": "*",
         "microphone": "*",
         "bluetooth": "*",
-        "maqueen": "github:dfrobot/pxt-maqueen#v1.5.5"
+        "maqueen": "github:dfrobot/pxt-maqueen#v1.7.14"
     },
     "files": [
         "main.blocks",
         "main.ts",
-        "README.md"
+        "README.md",
+        "main.py"
     ],
     "testFiles": [
         "test.ts"
@@ -19,14 +20,14 @@
         "branch": "v3.0.68",
         "tag": "v3.0.68",
         "commits": "https://github.com/microsoft/pxt-microbit/commits/c3fd936c8e507d2318fab615facb37d0f07179fb",
-        "target": "5.0.12",
+        "target": "7.0.51",
         "pxt": "6.0.39",
         "targetId": "microbit"
     },
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "blocksprj",
+    "preferredEditor": "pyprj",
     "yotta": {
         "config": {
             "microbit-dal": {

@@ -1,9 +1,36 @@
-function sendDistanceandSpeed () {
-    if (connected) {
-        bluetooth.uartWriteString("$CSB" + "" + "," + speed + "#")
-    }
+function Set_Volume() {
+    let l = control.createBuffer(7)
+    l.setUint8(0, 0x7E)
+    l.setUint8(1, 0x06)
+    l.setUint8(2, 0x00)
+    l.setUint8(3, 0x02)
+    l.setUint8(4, 0x00)
+    l.setUint8(5, Volume)
+    l.setUint8(6, 0xEF)
+    serial.writeBuffer(l)
 }
-bluetooth.onBluetoothConnected(function () {
+
+function Play_Track() {
+    let m = control.createBuffer(7)
+    m.setUint8(0, 0x7E)
+    m.setUint8(1, 0x03)
+    m.setUint8(2, 0x00)
+    m.setUint8(3, 0x02)
+    m.setUint8(4, 0x00)
+    m.setUint8(5, Track_Num)
+    m.setUint8(6, 0xEF)
+    serial.writeBuffer(m)
+}
+
+function sendDistanceandSpeed() {
+    if (connected) {
+        bluetooth.uartWriteString("$CSB" + "" + "," + ("" + ("" + speed)) + "#")
+    }
+    
+}
+
+bluetooth.onBluetoothConnected(function on_bluetooth_connected() {
+    
     basic.showIcon(IconNames.Happy)
     sendDistanceandSpeed()
     basic.pause(500)
@@ -14,11 +41,13 @@ bluetooth.onBluetoothConnected(function () {
         doSpeed()
     }
 })
-bluetooth.onBluetoothDisconnected(function () {
+bluetooth.onBluetoothDisconnected(function on_bluetooth_disconnected() {
+    
     basic.showIcon(IconNames.Sad)
     connected = false
 })
-function doSpeed () {
+function doSpeed() {
+    
     if (uartdata == "1") {
         speed = 20
     } else if (uartdata == "2") {
@@ -44,8 +73,10 @@ function doSpeed () {
     } else if (uartdata == "B4") {
         speed = 255
     }
+    
 }
-function CarCtrl () {
+
+function CarCtrl() {
     if (uartdata == "A") {
         basic.showString("F")
         maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, speed)
@@ -72,7 +103,13 @@ function CarCtrl () {
         basic.showIcon(IconNames.No)
         maqueen.motorStop(maqueen.Motors.All)
     }
+    
 }
+
+serial.redirect(SerialPin.P2, SerialPin.P1, BaudRate.BaudRate9600)
+let Volume = 16
+let Track_Num = 0
+basic.showIcon(IconNames.Rollerskate)
 let uartdata = ""
 let speed = 0
 let connected = false
@@ -81,7 +118,7 @@ bluetooth.startUartService()
 basic.showIcon(IconNames.Heart)
 connected = false
 speed = 100
-basic.forever(function () {
+basic.forever(function on_forever() {
     basic.pause(200)
     sendDistanceandSpeed()
 })
