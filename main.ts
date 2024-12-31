@@ -1,38 +1,34 @@
-function Set_Volume() {
+/**
+ * f / b
+ * 
+ * 1 & red
+ */
+function Set_Volume () {
     let l = control.createBuffer(7)
-    l.setUint8(0, 0x7E)
-    l.setUint8(1, 0x06)
-    l.setUint8(2, 0x00)
-    l.setUint8(3, 0x02)
-    l.setUint8(4, 0x00)
-    l.setUint8(5, Volume)
-    l.setUint8(6, 0xEF)
-    serial.writeBuffer(l)
+l.setUint8(0, 0x7E)
+l.setUint8(1, 0x06)
+l.setUint8(2, 0x00)
+l.setUint8(3, 0x02)
+l.setUint8(4, 0x00)
+l.setUint8(5, Volume)
+l.setUint8(6, 0xEF)
+serial.writeBuffer(l)
 }
-
-function Play_Track() {
-    let m = control.createBuffer(7)
-    m.setUint8(0, 0x7E)
-    m.setUint8(1, 0x03)
-    m.setUint8(2, 0x00)
-    m.setUint8(3, 0x02)
-    m.setUint8(4, 0x00)
-    m.setUint8(5, Track_Num)
-    m.setUint8(6, 0xEF)
-    serial.writeBuffer(m)
-}
-
-function sendDistanceandSpeed() {
+function sendDistanceandSpeed () {
     if (connected) {
-        bluetooth.uartWriteString("$CSB" + "" + "," + ("" + ("" + speed)) + "#")
+        bluetooth.uartWriteString("$CSB" + "" + "," + ("" + speed) + "#")
     }
-    
 }
-
-bluetooth.onBluetoothConnected(function on_bluetooth_connected() {
-    
+bluetooth.onBluetoothDisconnected(function () {
+    basic.showIcon(IconNames.Sad)
+    Track_Num = 1
+    Play_Track()
+    connected = false
+})
+bluetooth.onBluetoothConnected(function () {
+    Track_Num = 9
+    Play_Track()
     basic.showIcon(IconNames.Happy)
-    sendDistanceandSpeed()
     basic.pause(500)
     connected = true
     while (connected) {
@@ -41,13 +37,18 @@ bluetooth.onBluetoothConnected(function on_bluetooth_connected() {
         doSpeed()
     }
 })
-bluetooth.onBluetoothDisconnected(function on_bluetooth_disconnected() {
-    
-    basic.showIcon(IconNames.Sad)
-    connected = false
-})
-function doSpeed() {
-    
+function Play_Track () {
+    let m = control.createBuffer(7)
+m.setUint8(0, 0x7E)
+m.setUint8(1, 0x03)
+m.setUint8(2, 0x00)
+m.setUint8(3, 0x02)
+m.setUint8(4, 0x00)
+m.setUint8(5, Track_Num)
+m.setUint8(6, 0xEF)
+serial.writeBuffer(m)
+}
+function doSpeed () {
     if (uartdata == "1") {
         speed = 20
     } else if (uartdata == "2") {
@@ -73,15 +74,17 @@ function doSpeed() {
     } else if (uartdata == "B4") {
         speed = 255
     }
-    
 }
-
-function CarCtrl() {
+function CarCtrl () {
     if (uartdata == "A") {
         basic.showString("F")
+        Track_Num = 10
+        Play_Track()
         maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, speed)
     } else if (uartdata == "B") {
         basic.showString("B")
+        Track_Num = 8
+        Play_Track()
         maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CCW, speed)
     } else if (uartdata == "C") {
         basic.showString("L")
@@ -99,26 +102,34 @@ function CarCtrl() {
         basic.showString("r")
         maqueen.motorRun(maqueen.Motors.M2, maqueen.Dir.CCW, speed)
         maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CW, speed)
+    } else if (uartdata == "1") {
+        Track_Num = 1
+        Play_Track()
+    } else if (uartdata == "G") {
+        Track_Num = 6
+        Play_Track()
     } else if (uartdata == "0") {
         basic.showIcon(IconNames.No)
         maqueen.motorStop(maqueen.Motors.All)
     }
-    
 }
-
-serial.redirect(SerialPin.P2, SerialPin.P1, BaudRate.BaudRate9600)
-let Volume = 16
-let Track_Num = 0
-basic.showIcon(IconNames.Rollerskate)
 let uartdata = ""
 let speed = 0
 let connected = false
+let Track_Num = 0
+serial.redirect(
+SerialPin.P2,
+SerialPin.P1,
+BaudRate.BaudRate9600
+)
+let Volume = 16
+Track_Num = 0
 bluetooth.setTransmitPower(7)
 bluetooth.startUartService()
-basic.showIcon(IconNames.Heart)
+basic.showIcon(IconNames.Square)
 connected = false
 speed = 100
-basic.forever(function on_forever() {
+basic.forever(function () {
     basic.pause(200)
     sendDistanceandSpeed()
 })

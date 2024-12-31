@@ -8,6 +8,34 @@ def Set_Volume():
     l.set_uint8(5, Volume)
     l.set_uint8(6, 0xEF)
     serial.write_buffer(l)
+def sendDistanceandSpeed():
+    if connected:
+        bluetooth.uart_write_string("$CSB" + "" + "," + ("" + str(speed)) + "#")
+
+def on_bluetooth_connected():
+    global Track_Num, connected, uartdata
+    Track_Num = 9
+    Set_Volume()
+    Play_Track()
+    basic.show_icon(IconNames.HAPPY)
+    Set_Volume()
+    sendDistanceandSpeed()
+    basic.pause(500)
+    connected = True
+    while connected:
+        uartdata = bluetooth.uart_read_until(serial.delimiters(Delimiters.HASH))
+        CarCtrl()
+        doSpeed()
+bluetooth.on_bluetooth_connected(on_bluetooth_connected)
+
+def on_bluetooth_disconnected():
+    global Track_Num, connected
+    basic.show_icon(IconNames.SAD)
+    Set_Volume()
+    Track_Num = 1
+    Play_Track()
+    connected = False
+bluetooth.on_bluetooth_disconnected(on_bluetooth_disconnected)
 
 def Play_Track():
     m = bytearray(7)
@@ -19,30 +47,6 @@ def Play_Track():
     m.set_uint8(5, Track_Num)
     m.set_uint8(6, 0xEF)
     serial.write_buffer(m)
-
-
-def sendDistanceandSpeed():
-    if connected:
-        bluetooth.uart_write_string("$CSB" + "" + "," + ("" + str(speed)) + "#")
-
-def on_bluetooth_connected():
-    global connected, uartdata
-    basic.show_icon(IconNames.HAPPY)
-    sendDistanceandSpeed()
-    basic.pause(500)
-    connected = True
-    while connected:
-        uartdata = bluetooth.uart_read_until(serial.delimiters(Delimiters.HASH))
-        CarCtrl()
-        doSpeed()
-bluetooth.on_bluetooth_connected(on_bluetooth_connected)
-
-def on_bluetooth_disconnected():
-    global connected
-    basic.show_icon(IconNames.SAD)
-    connected = False
-bluetooth.on_bluetooth_disconnected(on_bluetooth_disconnected)
-
 def doSpeed():
     global speed
     if uartdata == "1":
@@ -95,20 +99,16 @@ def CarCtrl():
     elif uartdata == "0":
         basic.show_icon(IconNames.NO)
         maqueen.motor_stop(maqueen.Motors.ALL)
-        
-        
-    
-serial.redirect(SerialPin.P2, SerialPin.P1, BaudRate.BAUD_RATE9600)
-Volume = 16
-Track_Num = 0
-basic.show_icon(IconNames.ROLLERSKATE)
-
 uartdata = ""
 speed = 0
 connected = False
+Track_Num = 0
+serial.redirect(SerialPin.P2, SerialPin.P1, BaudRate.BAUD_RATE9600)
+Volume = 16
+Track_Num = 0
 bluetooth.set_transmit_power(7)
 bluetooth.start_uart_service()
-basic.show_icon(IconNames.HEART)
+basic.show_icon(IconNames.SQUARE)
 connected = False
 speed = 100
 
